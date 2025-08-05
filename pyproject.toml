@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "alignscore-SpeedOfMagic"
-version = "0.1.3"
+version = "0.1.4"
 authors = [
     { name = "Yuheng Zha", email = "yzha@ucsd.edu" },
     { name = "Yichi Yang", email = "yiy067@ucsd.edu" },
