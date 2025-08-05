@@ -1,8 +1,9 @@
 import math
 from typing import Optional, Tuple
-from transformers import AdamW, get_linear_schedule_with_warmup, AutoConfig
+from transformers import get_linear_schedule_with_warmup, AutoConfig
 from transformers import BertForPreTraining, BertModel, RobertaModel, AlbertModel, AlbertForMaskedLM, RobertaForMaskedLM
 import torch
+from torch.optim import AdamW
 import torch.nn as nn
 import pytorch_lightning as pl
 from sklearn.metrics import f1_score
@@ -21,7 +22,7 @@ class BERTAlignModel(pl.LightningModule):
             assert using_pretrained == True, "Only support pretrained muppet!"
             self.base_model = RobertaModel.from_pretrained(model)
             self.mlm_head = RobertaForMaskedLM(AutoConfig.from_pretrained(model)).lm_head
-            
+
         elif 'roberta' in model:
             if using_pretrained:
                 self.base_model = RobertaModel.from_pretrained(model)
@@ -29,7 +30,7 @@ class BERTAlignModel(pl.LightningModule):
             else:
                 self.base_model = RobertaModel(AutoConfig.from_pretrained(model))
                 self.mlm_head = RobertaForMaskedLM(AutoConfig.from_pretrained(model)).lm_head
-            
+
         elif 'albert' in model:
             if using_pretrained:
                 self.base_model = AlbertModel.from_pretrained(model)
@@ -37,7 +38,7 @@ class BERTAlignModel(pl.LightningModule):
             else:
                 self.base_model = AlbertModel(AutoConfig.from_pretrained(model))
                 self.mlm_head = AlbertForMaskedLM(AutoConfig.from_pretrained(model)).predictions
-            
+
         elif 'bert' in model:
             if using_pretrained:
                 self.base_model = BertModel.from_pretrained(model)
@@ -52,14 +53,14 @@ class BERTAlignModel(pl.LightningModule):
 
             self.base_model = BertModel(AutoConfig.from_pretrained('bert-base-uncased'))
             self.discriminator_predictor = ElectraDiscriminatorPredictions(self.base_model.config)
-            
-    
+
+
         self.bin_layer = nn.Linear(self.base_model.config.hidden_size, 2)
         self.tri_layer = nn.Linear(self.base_model.config.hidden_size, 3)
         self.reg_layer = nn.Linear(self.base_model.config.hidden_size, 1)
 
         self.dropout = nn.Dropout(p=0.1)
-        
+
         self.need_mlm = True
         self.is_finetune = False
         self.mlm_loss_factor = 0.5
@@ -74,7 +75,7 @@ class BERTAlignModel(pl.LightningModule):
                 attention_mask = batch['attention_mask'],
                 token_type_ids = batch['token_type_ids'] if 'token_type_ids' in batch.keys() else None
             )
-        
+
         prediction_scores = self.mlm_head(base_model_output.last_hidden_state) ## sequence_output for mlm
         seq_relationship_score = self.bin_layer(self.dropout(base_model_output.pooler_output)) ## pooled output for classification
         tri_label_score = self.tri_layer(self.dropout(base_model_output.pooler_output))
@@ -190,7 +191,7 @@ class BERTAlignModel(pl.LightningModule):
         self.log('reg_label_loss', loss_reg)
 
         return total_loss
-    
+
     def validation_step(self, val_batch, batch_idx):
         if not self.is_finetune:
             with torch.no_grad():
@@ -236,14 +237,14 @@ class BERTAlignModel(pl.LightningModule):
         if not self.is_finetune:
             total_loss = torch.stack(outputs).mean()
             self.log("val_loss", total_loss, prog_bar=True, sync_dist=True)
-        
+
         else:
             all_predictions = []
             all_labels = []
             for each_output in outputs:
                 all_predictions.extend(each_output['pred'])
                 all_labels.extend(each_output['labels'])
-            
+
             self.log("f1", f1_score(all_labels, all_predictions), prog_bar=True, sync_dist=True)
 
     def configure_optimizers(self):
