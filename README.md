@@ -1,3 +1,12 @@
+# SpeedOfMagic/AlignSCore
+
+Fork of an original repository used in atgen with the following changes:
+* Fix the classmethod bug in inference.py
+* Weaken requirements in pyproject.toml
+* Rename package name to AlignScore-SpeedOfMagic
+
+The original README.md is located below.
+
 # AlignScore
 This is the repository for AlignScore, a metric for automatic factual consistency evaluation of text pairs introduced in \
 [AlignScore: Evaluating Factual Consistency with a Unified Alignment Function](https://arxiv.org/abs/2305.16739) \
@@ -20,7 +29,7 @@ Factual consistency evaluation can be applied to many tasks like Summarization, 
 We introduce two leaderboards that compare AlignScore with similar-sized metrics and LLM-based metrics, respectively.
 ## Leaderboard --- compare with similar-sized metrics
 
-We list the performance of AlignScore as well as other metrics on the SummaC (includes 6 datasets) and TRUE (includes 11 datasets) benchmarks, as well as other popular factual consistency datasets (include 6 datasets). 
+We list the performance of AlignScore as well as other metrics on the SummaC (includes 6 datasets) and TRUE (includes 11 datasets) benchmarks, as well as other popular factual consistency datasets (include 6 datasets).
 
 | Rank | Metrics          | SummaC* | TRUE** | Other Datasets*** | Average**** | Paper | Code |
 | ---- | :--------------- | :-----: | :----: | :------------: | :-----: | :---: | :--: |
@@ -51,7 +60,7 @@ We list the performance of AlignScore as well as other metrics on the SummaC (in
 
 ** TRUE Benchmark: [\[Paper\]](https://arxiv.org/abs/2204.04991) \| [\[Github\]](https://github.com/google-research/true). We report AUC ROC on the TRUE benchmark.
 
-*** Besides the SummaC and TRUE benchmarks, we also include other popular factual consistency evaluation datasets: [XSumFaith](https://doi.org/10.18653/v1/2020.acl-main.173), [SummEval](https://doi.org/10.1162/tacl_a_00373), [QAGS-XSum](https://doi.org/10.18653/v1/2020.acl-main.450), [QAGS-CNNDM](https://doi.org/10.18653/v1/2020.acl-main.450), [FRANK-XSum](https://doi.org/10.18653/v1/2021.naacl-main.383), [FRANK-CNNDM](https://doi.org/10.18653/v1/2021.naacl-main.383) and [SamSum](https://doi.org/10.18653/v1/D19-5409). We compute the Spearman Correlation coefficients between the human annotated score and the metric predicted score, following common practice. 
+*** Besides the SummaC and TRUE benchmarks, we also include other popular factual consistency evaluation datasets: [XSumFaith](https://doi.org/10.18653/v1/2020.acl-main.173), [SummEval](https://doi.org/10.1162/tacl_a_00373), [QAGS-XSum](https://doi.org/10.18653/v1/2020.acl-main.450), [QAGS-CNNDM](https://doi.org/10.18653/v1/2020.acl-main.450), [FRANK-XSum](https://doi.org/10.18653/v1/2021.naacl-main.383), [FRANK-CNNDM](https://doi.org/10.18653/v1/2021.naacl-main.383) and [SamSum](https://doi.org/10.18653/v1/D19-5409). We compute the Spearman Correlation coefficients between the human annotated score and the metric predicted score, following common practice.
 
 **** To rank these metrics, we simply compute the average performance of SummaC, TRUE and Other Datasets.
 
@@ -79,7 +88,7 @@ We also show the performance comparison with large-language-model based metrics 
 
 The AlignScore metric is an automatic factual consistency evaluation metric built with the following parts:
 
-* Unified information alignment function between two arbitrary text pieces: It is trained on 4.7 million training examples from 7 well-established tasks (NLI, QA, paraphrasing, fact verification, information retrieval, semantic textual similarity and summarization) 
+* Unified information alignment function between two arbitrary text pieces: It is trained on 4.7 million training examples from 7 well-established tasks (NLI, QA, paraphrasing, fact verification, information retrieval, semantic textual similarity and summarization)
 
 * The chunk-sentence splitting method: The input context is splitted into chunks (contains roughly 350 tokens each) and the input claim is splitted into sentences. With the help of the alignment function, it's possible to know the alignment score between chunks and sentences. We pick the maximum alignment score for each sentence and then average these scores to get the example-level factual consistency score (AlignScore).
 
@@ -116,15 +125,15 @@ score = scorer.score(contexts=['hello world.'], claims=['hello world.'])
 
 
 # Checkpoints
-We provide two versions of the AlignScore checkpoints: `AlignScore-base` and `AlignScore-large`. The `-base` model is based on RoBERTa-base and has 125M parameters. The `-large` model is based on RoBERTa-large and has 355M parameters. 
+We provide two versions of the AlignScore checkpoints: `AlignScore-base` and `AlignScore-large`. The `-base` model is based on RoBERTa-base and has 125M parameters. The `-large` model is based on RoBERTa-large and has 355M parameters.
 
-**AlignScore-base**: 
+**AlignScore-base**:
 https://huggingface.co/yzha/AlignScore/resolve/main/AlignScore-base.ckpt
 
 **AlignScore-large**:
 https://huggingface.co/yzha/AlignScore/resolve/main/AlignScore-large.ckpt
 
-# Training  
+# Training
 You can use the above checkpoints directly for factual consistency evaluation. However, if you wish to train an alignment model from scratch / on your own data, use `train.py`.
 ```python
 python train.py --seed 2022 --batch-size 32 \
@@ -177,7 +186,7 @@ The relevant arguments for evaluating AlignScore are:
 For the baselines, please see `python benchmark.py --help` for details.
 
 ## Training datasets download
-Most datasets are downloadable from Huggingface (refer to [`generate_training_data.py`](https://github.com/yuh-zha/AlignScore/blob/main/generate_training_data.py)). Some datasets that needed to be imported manually are now also avaialable on Huggingface (See [Issue](https://github.com/yuh-zha/AlignScore/issues/6#issuecomment-1695448614)). 
+Most datasets are downloadable from Huggingface (refer to [`generate_training_data.py`](https://github.com/yuh-zha/AlignScore/blob/main/generate_training_data.py)). Some datasets that needed to be imported manually are now also avaialable on Huggingface (See [Issue](https://github.com/yuh-zha/AlignScore/issues/6#issuecomment-1695448614)).
 
 ## Evaluation datasets download
 
